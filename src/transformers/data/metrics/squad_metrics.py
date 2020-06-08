@@ -433,10 +433,23 @@ def compute_predictions_logits(
                     # We could hypothetically create invalid predictions, e.g., predict
                     # that the start of the span is in the question. We throw out all
                     # invalid predictions.
-                    if start_index >= len(feature.tokens):
+
+                    # Very last token is eos token. It cannot be a valid answer.
+                    last_valid_index = len(feature.tokens) - 2
+                    # First token of a paragraph is a sos token. It also cannot be a valid answer.
+                    first_valid_index = last_valid_index - feature.paragraph_len + 1
+                    if (
+                            (start_index < first_valid_index) or
+                            (start_index > last_valid_index)
+                    ):
                         continue
-                    if end_index >= len(feature.tokens):
+
+                    if (
+                            (end_index < first_valid_index) and
+                            (end_index > last_valid_index)
+                    ):
                         continue
+
                     if start_index not in feature.token_to_orig_map:
                         continue
                     if end_index not in feature.token_to_orig_map:
@@ -644,11 +657,27 @@ def compute_predictions_log_probs(
                     # We could hypothetically create invalid predictions, e.g., predict
                     # that the start of the span is in the question. We throw out all
                     # invalid predictions.
-                    if start_index >= feature.paragraph_len - 1:
-                        continue
-                    if end_index >= feature.paragraph_len - 1:
+
+                    # Very last token is eos token. It cannot be a valid answer.
+                    last_valid_index = len(feature.tokens) - 2
+                    # First token of a paragraph is a sos token. It also cannot be a valid answer.
+                    first_valid_index = last_valid_index - feature.paragraph_len + 1
+                    if (
+                            (start_index < first_valid_index) or
+                            (start_index > last_valid_index)
+                    ):
                         continue
 
+                    if (
+                            (end_index < first_valid_index) and
+                            (end_index > last_valid_index)
+                    ):
+                        continue
+
+                    if start_index not in feature.token_to_orig_map:
+                        continue
+                    if end_index not in feature.token_to_orig_map:
+                        continue
                     if not feature.token_is_max_context.get(start_index, False):
                         continue
                     if end_index < start_index:
