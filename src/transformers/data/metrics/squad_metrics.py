@@ -748,7 +748,7 @@ def compute_predictions_log_probs(
         # In very rare edge cases we could have no valid predictions. So we
         # just create a nonce prediction in this case to avoid failure.
         if not nbest:
-            nbest.append(_NbestPrediction(text="", start_log_prob=-1e6, end_log_prob=-1e6))
+            nbest.append(_NbestPrediction(text="empty", start_log_prob=-1e6, end_log_prob=-1e6))
 
         total_scores = []
         best_non_null_entry = None
