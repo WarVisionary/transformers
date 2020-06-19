@@ -438,15 +438,22 @@ def compute_predictions_logits(
                     last_valid_index = len(feature.tokens) - 2
                     # First token of a paragraph is a sos token. It also cannot be a valid answer.
                     first_valid_index = last_valid_index - feature.paragraph_len + 1
+
+                    # Also check for 0 index here since non-SQuADHead QA models rely
+                    # on 0th token to determine if a question has no-answer
                     if (
+                        (
                             (start_index < first_valid_index) or
                             (start_index > last_valid_index)
+                        ) and start_index != 0
                     ):
                         continue
 
                     if (
+                        (
                             (end_index < first_valid_index) and
                             (end_index > last_valid_index)
+                        ) and end_index != 0
                     ):
                         continue
 
